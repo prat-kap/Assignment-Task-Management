@@ -29,19 +29,18 @@ const TaskManager = () => {
     }
   ]
   useEffect(() => {
-    fetch(
-      "https://task-management-app-d8411-default-rtdb.firebaseio.com/tasks.json/tasks/:-Ne273P2lwh2Icq0X7E4",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-        //body: JSON.stringify(taskObj)
-      }
-    )
-      .then(res => res.json)
-      .then(data => console.log("data-----", data))
-
+    // fetch(
+    //   "https://task-management-app-d8411-default-rtdb.firebaseio.com/tasks.json/tasks/:-Ne273P2lwh2Icq0X7E4",
+    //   {
+    //     method: "GET",
+    //     headers: {
+    //       "Content-Type": "application/json"
+    //     }
+    //     //body: JSON.stringify(taskObj)
+    //   }
+    // )
+    //   .then(res => res.json)
+    //   .then(data => console.log("data-----", data))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
