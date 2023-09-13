@@ -12,7 +12,8 @@ import {
 
 import { useAuth } from "../../contexts/AuthContext"
 
-const Header = () => {
+const Header = props => {
+  const { handleSearch } = props
   const [error, setError] = useState("")
   const { currentUser, logout } = useAuth() || {}
   const navigate = useNavigate()
@@ -39,9 +40,9 @@ const Header = () => {
                 <Form inline>
                   <FormControl
                     type="text"
-                    placeholder="Search"
+                    placeholder="Search by title, status"
                     className="mr-sm-2"
-                    //onChange={e => setSearch(e.target.value)}
+                    onChange={e => handleSearch(e.target.value)}
                   />
                 </Form>
               )}

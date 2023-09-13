@@ -5,20 +5,22 @@ import Checkbox from "../../Checkbox/Checkbox"
 
 import { LABELS } from "../../../constants/CommonConsts"
 
-const TaskHeader = () => {
+const TaskHeader = props => {
+  const { item } = props
+  const { DueDate, status, title } = item
   const { DUE_DATE, STATUS, MARK_STATUS, EDIT, DELETE } = LABELS
   return (
     <Row>
       <Accordion.Header>
         <Col xs={6}>
           <Stack gap={1}>
-            <div className="title">Task Title 1</div>
-            <div className="date">{`${DUE_DATE} 23/09/2023`}</div>
+            <div className="title">{title}</div>
+            <div className="date">{`${DUE_DATE} ${DueDate}`}</div>
           </Stack>
         </Col>
         <Col>
           <Stack gap={1}>
-            <div className="status">{`${STATUS} Completed`}</div>
+            <div className="status">{`${STATUS} ${status}`}</div>
             <Checkbox label={MARK_STATUS} id={`default-checkbox`} />
           </Stack>
         </Col>
