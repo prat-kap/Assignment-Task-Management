@@ -8,6 +8,7 @@ import {
 import Login from "./components/Auth/Login"
 import Register from "./components/Auth/Register"
 import TaskManager from "./components/TaskManager/TaskManager"
+import UpdateTaskForm from "./components/UpdateTaskForm/UpdateTaskForm"
 
 import { AuthProvider } from "./contexts/AuthContext"
 import { useAuth } from "./contexts/AuthContext"
@@ -35,6 +36,7 @@ function App() {
             />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/updatetask" element={<UpdateTaskForm />} />
           </Routes>
         </AuthProvider>
       </Router>

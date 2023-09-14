@@ -1,0 +1,23 @@
+{
+"createAccount": "Créer compte",
+"loginAccount": "Connectez-vous à votre compte",
+"email":"courriel",
+"password":"Mot de passe",
+"login":"Se connecter",
+"needAnAccount": "Besoin d'un compte ?",
+"signUp":"S'inscrire",
+"failedToLogin":"Échec de la connexion",
+"fullName":"Nom complet",
+"confirmation":"Confirmation",
+"alreadyHaveAccount":"Vous avez déjà un compte ?",
+"failedToCreate":"Échec de la création d'un compte",
+"passwordNotMatch":"Les mots de passe ne correspondent pas",
+"taskManagment":"Gestion des tâches",
+"failedToLogout":"Échec de la déconnexion",
+"myProfile":"Mon profil",
+"logOut":"Se déconnecter",
+"english":"Anglais",
+"french":"Français",
+"searchBy":"Recherche par titre, statut"
+
+}

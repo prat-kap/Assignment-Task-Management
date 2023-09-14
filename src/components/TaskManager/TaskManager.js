@@ -1,105 +1,88 @@
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
-import { Accordion, Container } from "react-bootstrap"
+import { Accordion, Button, Container } from "react-bootstrap"
 
 import TaskHeader from "./TaskHeader/TaskHeader"
 import TaskDescription from "./TaskDescription/TaskDescription"
-import TaskAction from "../TaskAction/TaskAction"
 import Header from "../Header/Header"
+
+import { tasksData } from "../../services/tasks.services"
 
 import { LABELS } from "../../constants/CommonConsts"
 
 const TaskManager = () => {
   const [query, setQuery] = useState("")
-  const allTasks = [
-    {
-      title: "Task1",
-      description: "Description1",
-      status: "Pending",
-      DueDate: "23/09/2023"
-    },
-    {
-      title: "Task2",
-      description: "Description2",
-      status: "Pending",
-      DueDate: "25/09/2023"
-    },
-    {
-      title: "Task3",
-      description: "Description3",
-      status: "Completed",
-      DueDate: "26/09/2023"
-    }
-  ]
-  const [taskObj, setTaskObj] = useState(allTasks)
-  // useEffect(() => {
-  // fetch(
-  //   "https://task-management-app-d8411-default-rtdb.firebaseio.com/tasks.json/tasks/:-Ne273P2lwh2Icq0X7E4",
-  //   {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     }
-  //     //body: JSON.stringify(taskObj)
-  //   }
-  // )
-  //   .then(res => res.json)
-  //   .then(data => console.log("data-----", data))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [])
+  const [tasksList, setTasksList] = useState([])
 
-  const { ADD_NEW } = LABELS
+  const { ADD_NEW, WELCOME_ACCOUNT, LIST_OF_TASKS, VIEW_COMPLETED } = LABELS
 
-  //save reference for dragItem and dragOverItem
+  useEffect(() => {
+    getTasks()
+  }, [])
+
+  //Get all tasks from firebase database
+  const getTasks = async () => {
+    const data = await tasksData.getAllTasks()
+    setTasksList(data.docs.map(doc => ({ ...doc.data(), id: doc.id })))
+  }
+
+  //Save reference for dragItem and dragOverItem
   const dragItem = useRef(null)
   const dragOverItem = useRef(null)
 
-  //const handle drag sorting
+  //Handle drag sorting
   const handleSort = () => {
-    let _taskItems = [...taskObj]
-
-    const draggedItemContent = _taskItems.splice(dragItem.current, 1)[0]
-    _taskItems.splice(dragOverItem.current, 0, draggedItemContent)
-
+    let taskItems = [...tasksList]
+    const draggedItemContent = taskItems.splice(dragItem.current, 1)[0]
+    taskItems.splice(dragOverItem.current, 0, draggedItemContent)
     dragItem.current = null
     dragOverItem.current = null
-
-    setTaskObj(_taskItems)
+    setTasksList(taskItems)
   }
 
-  const handleSearch = value => {
-    setQuery(value)
+  //Handle task search
+  const handleSearch = e => {
+    e.preventDefault()
+    e.stopPropagation()
+    setQuery(e.target.value)
   }
-
+  console.log("tasks-----", tasksList)
   return (
     <>
       <Header handleSearch={handleSearch} />
       <Container>
-        <Link to="/CreateNew">
-          <TaskAction
-            className={"default-btn p-2"}
-            variant={"primary"}
-            action={ADD_NEW}
-          />
+        <h2 className="text-center mb-2 mt-2">{WELCOME_ACCOUNT}</h2>
+        <h5 className="mb-1 mt-1">{LIST_OF_TASKS}</h5>
+        <Link to="/updatetask">
+          <Button className={"default-btn p-1 mt-1 mb-2"} variant={"primary"}>
+            {ADD_NEW}
+          </Button>
         </Link>
+        <Link to="/completedtasks">{VIEW_COMPLETED}</Link>
         <Accordion defaultActiveKey="0">
-          {taskObj
+          {tasksList
             .filter(
               task =>
-                task.title.toLowerCase().includes(query) ||
-                task.status.toLowerCase().includes(query)
+                task?.title?.toLowerCase().includes(query) ||
+                task?.status?.toLowerCase().includes(query)
             )
             .map((item, index) => (
               <Accordion.Item
                 eventKey={index}
                 key={index}
                 draggable
-                onDragStart={e => (dragItem.current = index)}
-                onDragEnter={e => (dragOverItem.current = index)}
+                onDragStart={e => {
+                  console.log("dragstart", index, item)
+                  return (dragItem.current = index)
+                }}
+                onDragEnter={e => {
+                  console.log("dragenter", index, item)
+                  return (dragOverItem.current = index)
+                }}
                 onDragEnd={handleSort}
                 onDragOver={e => e.preventDefault()}
               >
-                <TaskHeader item={item} />
+                <TaskHeader item={item} getTasks={getTasks} />
                 <TaskDescription item={item} />
               </Accordion.Item>
             ))}

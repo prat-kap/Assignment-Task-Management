@@ -1,21 +1,44 @@
-import { Accordion, Row, Col, Stack, Button } from "react-bootstrap"
+import { Accordion, Row, Col, Stack, Card } from "react-bootstrap"
+import { useNavigate } from "react-router-dom"
 
 import Checkbox from "../../Checkbox/Checkbox"
-//import TaskAction from "../../TaskAction/TaskAction"
+
+import { tasksData } from "../../../services/tasks.services"
 
 import { LABELS } from "../../../constants/CommonConsts"
 
+import "../TaskManager.css"
+
 const TaskHeader = props => {
-  const { item } = props
-  const { DueDate, status, title } = item
+  const { item, getTasks } = props
+  const { dueDate, status, title } = item
   const { DUE_DATE, STATUS, MARK_STATUS, EDIT, DELETE } = LABELS
+  const navigate = useNavigate()
+
+  //Hnadle delete task
+  const handleDelete = async (e, id) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await tasksData.deleteTask(id)
+    getTasks()
+  }
+
+  //Handle edit task
+  const handleEdit = async (e, id) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const docSnap = await tasksData.getTask(id)
+    const taskDetails = docSnap.data()
+    navigate("/updatetask", { state: { id, taskDetails } })
+  }
+
   return (
     <Row>
       <Accordion.Header>
         <Col xs={6}>
           <Stack gap={1}>
             <div className="title">{title}</div>
-            <div className="date">{`${DUE_DATE} ${DueDate}`}</div>
+            <div className="date">{`${DUE_DATE} ${dueDate}`}</div>
           </Stack>
         </Col>
         <Col>
@@ -26,20 +49,18 @@ const TaskHeader = props => {
         </Col>
         <Col>
           <Stack direction="horizontal" gap={2}>
-            <Button
-              className={`default-btn ms-auto p-2`}
-              variant={"success"}
-              //action={EDIT}
+            <Card.Link
+              className={"custom-link edit p-2"}
+              onClick={e => handleEdit(e, item.id)}
             >
               {EDIT}
-            </Button>
-            <Button
-              className={"default-btn p-2"}
-              variant={"danger"}
-              //action={DELETE}
+            </Card.Link>
+            <Card.Link
+              className={"custom-link delete p-2"}
+              onClick={e => handleDelete(e, item.id)}
             >
               {DELETE}
-            </Button>
+            </Card.Link>
           </Stack>
         </Col>
       </Accordion.Header>

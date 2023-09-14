@@ -3,24 +3,30 @@ import { Link, useNavigate } from "react-router-dom"
 import { Container, Form, Button, Card, Alert } from "react-bootstrap"
 
 import Header from "../Header/Header"
+import Loading from "../Loader/Loading"
 
 import { useAuth } from "../../contexts/AuthContext"
-
 import { Formik } from "formik"
-import { FormattedMessage } from "react-intl"
+import { FORM_LABELS, MESSAGES } from "../../constants/CommonConsts"
 
 const Login = () => {
-  const [error, setError] = useState("")
+  const [message, setMessage] = useState({ error: false, msg: "" })
   const [loading, setLoading] = useState(false)
+
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  const { EMAIL, PASSWORD, SIGN_UP, LOG_IN, LOG_INTO_ACCOUNT, NEED_ACCOUNT } =
+    FORM_LABELS
+  const { LOGGED_SUCCESSFULLY, FAILED_LOG_IN } = MESSAGES
 
   return (
     <>
       <Header />
+      {loading && <Loading />}
       <Container
         className="d-flex align-items-center justify-content-center"
-        style={{ minHeight: "100vh" }}
+        style={{ minHeight: "85vh" }}
       >
         <div className="w-100" style={{ maxWidth: "400px" }}>
           <Formik
@@ -30,14 +36,13 @@ const Login = () => {
             }}
             onSubmit={async values => {
               try {
-                setError("")
+                setMessage({ error: false, msg: LOGGED_SUCCESSFULLY })
                 setLoading(true)
                 await login(values.email, values.password)
                 navigate("/")
               } catch {
-                setError("Failed to log in")
+                setMessage({ error: true, msg: FAILED_LOG_IN })
               }
-
               setLoading(false)
             }}
           >
@@ -45,27 +50,32 @@ const Login = () => {
               <>
                 <Card>
                   <Card.Body>
-                    <h2 className="text-center mb-4">
-                      <FormattedMessage
-                        id="Login.loginAccount"
-                        defaultMessage="Log in to your account"
-                      />
-                    </h2>
-                    {error && <Alert variant="danger">{error}</Alert>}
+                    <h2 className="text-center mb-4">{LOG_INTO_ACCOUNT}</h2>
+                    {message?.msg && (
+                      <Alert
+                        variant={message?.error ? "danger" : "success"}
+                        dismissible
+                        onClose={() => setMessage({ error: false, msg: "" })}
+                      >
+                        {message?.msg}
+                      </Alert>
+                    )}
                     <Form onSubmit={handleSubmit}>
                       <Form.Group controlId="email">
-                        <Form.Label>Email</Form.Label>
+                        <Form.Label>{EMAIL}</Form.Label>
                         <Form.Control
                           type="email"
+                          name="email"
                           value={values.email}
                           onChange={handleChange}
                           required
                         />
                       </Form.Group>
                       <Form.Group controlId="password">
-                        <Form.Label>Password</Form.Label>
+                        <Form.Label>{PASSWORD}</Form.Label>
                         <Form.Control
                           type="password"
+                          name="password"
                           value={values.password}
                           onChange={handleChange}
                           required
@@ -76,13 +86,13 @@ const Login = () => {
                         className="w-100 mt-3"
                         type="submit"
                       >
-                        Log In
+                        {LOG_IN}
                       </Button>
                     </Form>
                   </Card.Body>
                 </Card>
                 <div className="w-100 text-center mt-3">
-                  Need an account? <Link to="/register">Sign Up</Link>
+                  {NEED_ACCOUNT} <Link to="/register">{SIGN_UP}</Link>
                 </div>
               </>
             )}

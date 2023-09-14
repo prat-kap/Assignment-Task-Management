@@ -1,0 +1,22 @@
+{
+"createAccount": "Create Account",
+"loginAccount": "Log in to your account",
+"email":"Email",
+"password":"Password",
+"login":"Log In",
+"needAnAccount": "Need an account ?",
+"signUp":"Sign Up",
+"failedToLogin":"Failed to log in",
+"fullName":"Full Name",
+"confirmation":"Confirmation",
+"alreadyHaveAccount":"Already have an account ?",
+"failedToCreate":"Failed to create an account",
+"passwordNotMatch":"Passwords do not match",
+"taskManagment":"Task Management",
+"failedToLogout":"Failed to log out",
+"myProfile":"My Profile",
+"logOut":"Log Out",
+"english":"English",
+"french":"French",
+"searchBy":"Search by title, status"
+}
