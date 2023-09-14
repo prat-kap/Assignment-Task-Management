@@ -18,5 +18,7 @@
 "logOut":"Log Out",
 "english":"English",
 "french":"French",
-"searchBy":"Search by title, status"
+"searchBy":"Search by title, status",
+"loggedInSucceesful":"Logged in successfully",
+"accountCreated":"Account created successfully"
 }

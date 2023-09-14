@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Container,
@@ -10,10 +10,9 @@ import {
   Alert
 } from "react-bootstrap"
 import PropTypes from "prop-types"
+import { useTranslation } from "react-i18next"
 
 import { useAuth } from "../../contexts/AuthContext"
-
-import { LABELS, MESSAGES, FORM_LABELS } from "../../constants/CommonConsts"
 
 const Header = props => {
   const { handleSearch } = props
@@ -21,10 +20,19 @@ const Header = props => {
 
   const { currentUser, logout } = useAuth() || {}
   const navigate = useNavigate()
+  const [selectedLang, setSelectedLang] = useState(navigator.language)
+  const { t, i18n } = useTranslation("common")
 
-  const { FAILED_LOG_OUT } = MESSAGES
-  const { TASK_MANAGEMENT, MY_PROFILE } = LABELS
-  const { LOGOUT } = FORM_LABELS
+  const onChangeLanguage = e => {
+    i18n.changeLanguage(e.target.value)
+    setSelectedLang(e.target.value)
+  }
+
+  useEffect(() => {
+    const lng = navigator.language
+    i18n.changeLanguage(lng)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   //Handle logout
   async function logoutHandler() {
@@ -33,7 +41,7 @@ const Header = props => {
       await logout()
       navigate("/login")
     } catch {
-      setError(FAILED_LOG_OUT)
+      setError(`${t("failedToLogout")}`)
     }
   }
 
@@ -41,7 +49,8 @@ const Header = props => {
     <>
       <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
         <Container>
-          <Navbar.Brand href="/">{TASK_MANAGEMENT}</Navbar.Brand>
+          <Navbar.Brand href="/">{t("taskManagment")}</Navbar.Brand>
+
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="m-auto">
@@ -49,30 +58,45 @@ const Header = props => {
                 <Form inline>
                   <FormControl
                     type="text"
-                    placeholder="Search by title, status"
+                    placeholder={t("searchBy")}
                     className="mr-sm-2"
                     onChange={e => handleSearch(e)}
                   />
                 </Form>
               )}
             </Nav>
-            <Nav>
+            <Nav className="mr-2">
               {currentUser && (
                 <>
                   <NavDropdown
                     title={`${currentUser.email}`}
                     id="collasible-nav-dropdown"
                   >
-                    <NavDropdown.Item href="/">{MY_PROFILE}</NavDropdown.Item>
+                    <NavDropdown.Item href="/">
+                      {t("myProfile")}
+                    </NavDropdown.Item>
                     <NavDropdown.Divider />
                     <NavDropdown.Item onClick={logoutHandler}>
-                      {LOGOUT}
+                      {t("logOut")}
                     </NavDropdown.Item>
                   </NavDropdown>
                 </>
               )}
             </Nav>
           </Navbar.Collapse>
+          <Nav>
+            <>
+              <Form.Select
+                aria-label="Default select example"
+                size="sm"
+                value={selectedLang}
+                onChange={onChangeLanguage}
+              >
+                <option value="en"> {t("english")}</option>
+                <option value="fr"> {t("french")}</option>
+              </Form.Select>
+            </>
+          </Nav>
         </Container>
       </Navbar>
       {error && <Alert variant="danger">{error}</Alert>}

@@ -18,6 +18,8 @@
 "logOut":"Se déconnecter",
 "english":"Anglais",
 "french":"Français",
-"searchBy":"Recherche par titre, statut"
+"searchBy":"Recherche par titre, statut",
+"loggedInSucceesful":"Connexion réussie",
+"accountCreated":"Compte créé avec succès"
 
 }

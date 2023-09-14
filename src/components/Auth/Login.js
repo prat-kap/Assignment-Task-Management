@@ -1,13 +1,13 @@
 import React, { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Container, Form, Button, Card, Alert } from "react-bootstrap"
+import { useTranslation } from "react-i18next"
 
 import Header from "../Header/Header"
 import Loading from "../Loader/Loading"
 
 import { useAuth } from "../../contexts/AuthContext"
 import { Formik } from "formik"
-import { FORM_LABELS, MESSAGES } from "../../constants/CommonConsts"
 
 const Login = () => {
   const [message, setMessage] = useState({ error: false, msg: "" })
@@ -15,10 +15,7 @@ const Login = () => {
 
   const { login } = useAuth()
   const navigate = useNavigate()
-
-  const { EMAIL, PASSWORD, SIGN_UP, LOG_IN, LOG_INTO_ACCOUNT, NEED_ACCOUNT } =
-    FORM_LABELS
-  const { LOGGED_SUCCESSFULLY, FAILED_LOG_IN } = MESSAGES
+  const { t } = useTranslation("common")
 
   return (
     <>
@@ -36,12 +33,12 @@ const Login = () => {
             }}
             onSubmit={async values => {
               try {
-                setMessage({ error: false, msg: LOGGED_SUCCESSFULLY })
+                setMessage({ error: false, msg: `${t("loggedInSucceesful")}` })
                 setLoading(true)
                 await login(values.email, values.password)
                 navigate("/")
               } catch {
-                setMessage({ error: true, msg: FAILED_LOG_IN })
+                setMessage({ error: true, msg: `${t("failedToLogin")}` })
               }
               setLoading(false)
             }}
@@ -50,7 +47,7 @@ const Login = () => {
               <>
                 <Card>
                   <Card.Body>
-                    <h2 className="text-center mb-4">{LOG_INTO_ACCOUNT}</h2>
+                    <h2 className="text-center mb-4">{t("loginAccount")}</h2>
                     {message?.msg && (
                       <Alert
                         variant={message?.error ? "danger" : "success"}
@@ -62,7 +59,7 @@ const Login = () => {
                     )}
                     <Form onSubmit={handleSubmit}>
                       <Form.Group controlId="email">
-                        <Form.Label>{EMAIL}</Form.Label>
+                        <Form.Label>{t("email")}</Form.Label>
                         <Form.Control
                           type="email"
                           name="email"
@@ -72,7 +69,7 @@ const Login = () => {
                         />
                       </Form.Group>
                       <Form.Group controlId="password">
-                        <Form.Label>{PASSWORD}</Form.Label>
+                        <Form.Label>{t("password")}</Form.Label>
                         <Form.Control
                           type="password"
                           name="password"
@@ -86,13 +83,13 @@ const Login = () => {
                         className="w-100 mt-3"
                         type="submit"
                       >
-                        {LOG_IN}
+                        {t("login")}
                       </Button>
                     </Form>
                   </Card.Body>
                 </Card>
                 <div className="w-100 text-center mt-3">
-                  {NEED_ACCOUNT} <Link to="/register">{SIGN_UP}</Link>
+                  {t("needAnAccount")} <Link to="/register">{t("signUp")}</Link>
                 </div>
               </>
             )}

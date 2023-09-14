@@ -1,15 +1,13 @@
 import React, { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Container, Form, Button, Card, Alert } from "react-bootstrap"
+import { useTranslation } from "react-i18next"
 
 import Header from "../Header/Header"
 import Loading from "../Loader/Loading"
 
 import { useAuth } from "../../contexts/AuthContext"
 import { Formik } from "formik"
-import { FORM_LABELS, MESSAGES } from "../../constants/CommonConsts"
-
-import { FormattedMessage } from "react-intl"
 
 const Register = () => {
   const [message, setMessage] = useState({ error: false, msg: "" })
@@ -17,19 +15,7 @@ const Register = () => {
 
   const { signup } = useAuth()
   const navigate = useNavigate()
-
-  const {
-    CREATE_ACCOUNT,
-    FULL_NAME,
-    EMAIL,
-    PASSWORD,
-    PASSWORD_CONFIRMATION,
-    SIGN_UP,
-    LOG_IN,
-    ALREADY_ACCOUNT
-  } = FORM_LABELS
-  const { PASSWORD_MISMATCH, ACCOUNT_CREATED, ACCOUNT_CREATION_FAILED } =
-    MESSAGES
+  const { t } = useTranslation("common")
 
   return (
     <>
@@ -51,19 +37,19 @@ const Register = () => {
               if (values.password !== values.confirmPassword) {
                 return setMessage({
                   error: true,
-                  msg: PASSWORD_MISMATCH
+                  msg: `${t("passwordNotMatch")}`
                 })
               }
               try {
                 setMessage({
                   error: false,
-                  msg: ACCOUNT_CREATED
+                  msg: `${t("accountCreated")}`
                 })
                 setLoading(true)
                 await signup(values.email, values.password)
                 navigate("/")
               } catch {
-                setMessage({ error: true, msg: ACCOUNT_CREATION_FAILED })
+                setMessage({ error: true, msg: `${t("failedToCreate")}` })
               }
               setLoading(false)
             }}
@@ -72,7 +58,7 @@ const Register = () => {
               <>
                 <Card>
                   <Card.Body>
-                    <h2 className="text-center mb-4">{CREATE_ACCOUNT}</h2>
+                    <h2 className="text-center mb-4">{t("createAccount")}</h2>
                     {message?.msg && (
                       <Alert
                         variant={message?.error ? "danger" : "success"}
@@ -84,7 +70,7 @@ const Register = () => {
                     )}
                     <Form onSubmit={handleSubmit}>
                       <Form.Group controlId="fullName">
-                        <Form.Label>{FULL_NAME}</Form.Label>
+                        <Form.Label>{t("fullName")}</Form.Label>
                         <Form.Control
                           type="text"
                           name="fullName"
@@ -94,7 +80,7 @@ const Register = () => {
                         />
                       </Form.Group>
                       <Form.Group controlId="email">
-                        <Form.Label>{EMAIL}</Form.Label>
+                        <Form.Label>{t("email")}</Form.Label>
                         <Form.Control
                           type="email"
                           name="email"
@@ -104,7 +90,7 @@ const Register = () => {
                         />
                       </Form.Group>
                       <Form.Group controlId="password">
-                        <Form.Label>{PASSWORD}</Form.Label>
+                        <Form.Label>{t("password")}</Form.Label>
                         <Form.Control
                           type="password"
                           name="password"
@@ -114,7 +100,10 @@ const Register = () => {
                         />
                       </Form.Group>
                       <Form.Group controlId="confirmPassword">
-                        <Form.Label>{PASSWORD_CONFIRMATION}</Form.Label>
+                        <Form.Label>
+                          {" "}
+                          {t("password")} {t("confirmation")}
+                        </Form.Label>
                         <Form.Control
                           type="password"
                           name="confirmPassword"
@@ -128,13 +117,14 @@ const Register = () => {
                         className="w-100 mt-3"
                         type="submit"
                       >
-                        {SIGN_UP}
+                        {t("signUp")}
                       </Button>
                     </Form>
                   </Card.Body>
                 </Card>
                 <div className="w-100 text-center mt-3">
-                  {ALREADY_ACCOUNT} <Link to="/login">{LOG_IN}</Link>
+                  {t("alreadyHaveAccount")}{" "}
+                  <Link to="/login">{t("login")}</Link>
                 </div>
               </>
             )}
