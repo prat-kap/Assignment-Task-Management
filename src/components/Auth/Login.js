@@ -7,6 +7,7 @@ import Header from "../Header/Header"
 import { useAuth } from "../../contexts/AuthContext"
 
 import { Formik } from "formik"
+import { FormattedMessage } from "react-intl"
 
 const Login = () => {
   const [error, setError] = useState("")
@@ -44,7 +45,12 @@ const Login = () => {
               <>
                 <Card>
                   <Card.Body>
-                    <h2 className="text-center mb-4">Log in to your account</h2>
+                    <h2 className="text-center mb-4">
+                      <FormattedMessage
+                        id="Login.loginAccount"
+                        defaultMessage="Log in to your account"
+                      />
+                    </h2>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
                       <Form.Group controlId="email">

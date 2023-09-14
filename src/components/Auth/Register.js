@@ -8,6 +8,8 @@ import { useAuth } from "../../contexts/AuthContext"
 
 import { Formik } from "formik"
 
+import { FormattedMessage } from "react-intl"
+
 const Register = () => {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -48,6 +50,12 @@ const Register = () => {
               <>
                 <Card>
                   <Card.Body>
+                    <h2 className="text-center mb-4">
+                      <FormattedMessage
+                        id="Register.createAccount"
+                        defaultMessage="Create account."
+                      />
+                    </h2>
                     <h2 className="text-center mb-4">Create account</h2>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
