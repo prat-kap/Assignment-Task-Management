@@ -1,0 +1,12 @@
+.custom-link,
+.custom-link:hover {
+  text-decoration: none;
+  color: #fff;
+  border-radius: 5px;
+}
+.edit {
+  background: green;
+}
+.delete {
+  background: indianred;
+}
