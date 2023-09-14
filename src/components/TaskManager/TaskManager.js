@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react"
-import { Link } from "react-router-dom"
-import { Accordion, Button, Container } from "react-bootstrap"
+import React, { useEffect, useState } from "react"
+import { Link, useLocation } from "react-router-dom"
+import { Button, Container, Stack } from "react-bootstrap"
 
-import TaskHeader from "./TaskHeader/TaskHeader"
-import TaskDescription from "./TaskDescription/TaskDescription"
 import Header from "../Header/Header"
+import TaskView from "./TaskView/TaskView"
+import Loading from "../Loader/Loading"
 
 import { tasksData } from "../../services/tasks.services"
 
@@ -13,31 +13,28 @@ import { LABELS } from "../../constants/CommonConsts"
 const TaskManager = () => {
   const [query, setQuery] = useState("")
   const [tasksList, setTasksList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const location = useLocation()
 
-  const { ADD_NEW, WELCOME_ACCOUNT, LIST_OF_TASKS, VIEW_COMPLETED } = LABELS
+  const {
+    ADD_NEW,
+    WELCOME_ACCOUNT,
+    LIST_OF,
+    VIEW_COMPLETED,
+    PENDING,
+    COMPLETED
+  } = LABELS
 
   useEffect(() => {
     getTasks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   //Get all tasks from firebase database
   const getTasks = async () => {
     const data = await tasksData.getAllTasks()
     setTasksList(data.docs.map(doc => ({ ...doc.data(), id: doc.id })))
-  }
-
-  //Save reference for dragItem and dragOverItem
-  const dragItem = useRef(null)
-  const dragOverItem = useRef(null)
-
-  //Handle drag sorting
-  const handleSort = () => {
-    let taskItems = [...tasksList]
-    const draggedItemContent = taskItems.splice(dragItem.current, 1)[0]
-    taskItems.splice(dragOverItem.current, 0, draggedItemContent)
-    dragItem.current = null
-    dragOverItem.current = null
-    setTasksList(taskItems)
+    setLoading(false)
   }
 
   //Handle task search
@@ -46,47 +43,52 @@ const TaskManager = () => {
     e.stopPropagation()
     setQuery(e.target.value)
   }
-  console.log("tasks-----", tasksList)
+
+  //Get pending and completed tasks
+  const isCompleted = location.state?.completed
+  const pendingTasks =
+    tasksList && tasksList.filter(task => task.status === PENDING)
+  const completedTasks =
+    tasksList && tasksList.filter(task => task.status === COMPLETED)
+
   return (
     <>
       <Header handleSearch={handleSearch} />
       <Container>
-        <h2 className="text-center mb-2 mt-2">{WELCOME_ACCOUNT}</h2>
-        <h5 className="mb-1 mt-1">{LIST_OF_TASKS}</h5>
-        <Link to="/updatetask">
-          <Button className={"default-btn p-1 mt-1 mb-2"} variant={"primary"}>
-            {ADD_NEW}
-          </Button>
-        </Link>
-        <Link to="/completedtasks">{VIEW_COMPLETED}</Link>
-        <Accordion defaultActiveKey="0">
-          {tasksList
-            .filter(
-              task =>
-                task?.title?.toLowerCase().includes(query) ||
-                task?.status?.toLowerCase().includes(query)
-            )
-            .map((item, index) => (
-              <Accordion.Item
-                eventKey={index}
-                key={index}
-                draggable
-                onDragStart={e => {
-                  console.log("dragstart", index, item)
-                  return (dragItem.current = index)
-                }}
-                onDragEnter={e => {
-                  console.log("dragenter", index, item)
-                  return (dragOverItem.current = index)
-                }}
-                onDragEnd={handleSort}
-                onDragOver={e => e.preventDefault()}
+        <h2 className="text-center mb-4 mt-2">{WELCOME_ACCOUNT}</h2>
+        <h5 className="mb-3 mt-1">{`${LIST_OF} ${
+          !isCompleted ? PENDING : COMPLETED
+        } tasks arranged by priority`}</h5>
+        {!isCompleted && (
+          <Stack gap={1} direction="horizontal">
+            <Link to="/updatetask">
+              <Button
+                className={"default-btn p-1 mt-1 mb-2"}
+                variant={"primary"}
               >
-                <TaskHeader item={item} getTasks={getTasks} />
-                <TaskDescription item={item} />
-              </Accordion.Item>
-            ))}
-        </Accordion>
+                {ADD_NEW}
+              </Button>
+            </Link>
+            <Link
+              to="/completedtasks"
+              className="ms-auto"
+              state={{
+                tasksList: tasksList,
+                query: query,
+                completed: true
+              }}
+            >
+              {VIEW_COMPLETED}
+            </Link>
+          </Stack>
+        )}
+        {loading && <Loading />}
+        <TaskView
+          tasksList={!isCompleted ? pendingTasks : completedTasks}
+          query={query}
+          setTasksList={setTasksList}
+          getTasks={getTasks}
+        />
       </Container>
     </>
   )

@@ -33,4 +33,3 @@ class TasksData {
 }
 
 export const tasksData = new TasksData()
-//export default tasksData

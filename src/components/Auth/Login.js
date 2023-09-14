@@ -36,6 +36,7 @@ const Login = () => {
                 setMessage({ error: false, msg: `${t("loggedInSucceesful")}` })
                 setLoading(true)
                 await login(values.email, values.password)
+                window.localStorage.setItem("isLoggedIn", true)
                 navigate("/")
               } catch {
                 setMessage({ error: true, msg: `${t("failedToLogin")}` })

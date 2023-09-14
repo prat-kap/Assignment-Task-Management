@@ -8,6 +8,7 @@ import Loading from "../Loader/Loading"
 
 import { useAuth } from "../../contexts/AuthContext"
 import { Formik } from "formik"
+import { MESSAGES } from "../../constants/CommonConsts"
 
 const Register = () => {
   const [message, setMessage] = useState({ error: false, msg: "" })
@@ -16,6 +17,8 @@ const Register = () => {
   const { signup } = useAuth()
   const navigate = useNavigate()
   const { t } = useTranslation("common")
+
+  const { MIN_CHARACTERS_REQUIRED } = MESSAGES
 
   return (
     <>
@@ -34,6 +37,12 @@ const Register = () => {
               confirmPassword: ""
             }}
             onSubmit={async values => {
+              if (values.password.length < 6) {
+                return setMessage({
+                  error: true,
+                  msg: MIN_CHARACTERS_REQUIRED
+                })
+              }
               if (values.password !== values.confirmPassword) {
                 return setMessage({
                   error: true,
@@ -47,6 +56,7 @@ const Register = () => {
                 })
                 setLoading(true)
                 await signup(values.email, values.password)
+                window.localStorage.setItem("isLoggedIn", true)
                 navigate("/")
               } catch {
                 setMessage({ error: true, msg: `${t("failedToCreate")}` })
@@ -94,6 +104,7 @@ const Register = () => {
                         <Form.Control
                           type="password"
                           name="password"
+                          placeholder="Minimum 6 characters length"
                           value={values.password}
                           onChange={handleChange}
                           required

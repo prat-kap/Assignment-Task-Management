@@ -22,12 +22,6 @@ const firebaseApp = initializeApp({
   appId: "1:244620380568:web:c169801f2f4c19d110c3ed",
   measurementId: "G-G1468NS7CK"
 })
-//export const auth = app.auth()
+
 export const auth = getAuth(firebaseApp)
 export const db = getFirestore(firebaseApp)
-//export default firebaseApp
-// Initialize Firebase
-//const app = initializeApp(firebaseConfig)
-
-// Initialize Firebase Authentication and get a reference to the service
-//export const auth = getAuth(app)

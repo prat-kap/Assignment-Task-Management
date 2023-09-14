@@ -11,11 +11,13 @@ export const LABELS = {
   EDIT_TASK: "Edit Task",
   ADD_TASK: "Add Task",
   MY_PROFILE: "My Profile",
-  MARK_STATUS: "Mark as complete/ incomplete",
+  MARK_STATUS: "Mark as",
   CREATE_UPDATE_TASK: "Create/ Update Task",
   WELCOME_ACCOUNT: "Welcome to your account",
-  LIST_OF_TASKS: "List of pending tasks",
-  VIEW_COMPLETED: "View completed tasks"
+  LIST_OF: "List of",
+  VIEW_COMPLETED: "View completed tasks",
+  PENDING: "pending",
+  COMPLETED: "completed"
 }
 export const FORM_LABELS = {
   CREATE_ACCOUNT: "Create account",
@@ -37,6 +39,7 @@ export const MESSAGES = {
   FAILED_LOG_IN: "Failed to log in",
   LOGGED_SUCCESSFULLY: "Logged in successfully",
   PASSWORD_MISMATCH: "Passwords do not match",
+  MIN_CHARACTERS_REQUIRED: "Password should be minimum 6 characters",
   ACCOUNT_CREATED: "Account created successfully",
   ACCOUNT_CREATION_FAILED: "Failed to create an account"
 }

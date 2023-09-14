@@ -39,6 +39,7 @@ const Header = props => {
     setError("")
     try {
       await logout()
+      window.localStorage.removeItem("isLoggedIn")
       navigate("/login")
     } catch {
       setError(`${t("failedToLogout")}`)
@@ -55,7 +56,7 @@ const Header = props => {
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="m-auto">
               {currentUser && handleSearch && (
-                <Form inline>
+                <Form inline="true">
                   <FormControl
                     type="text"
                     placeholder={t("searchBy")}

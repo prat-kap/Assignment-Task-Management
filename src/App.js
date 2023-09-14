@@ -13,8 +13,6 @@ import UpdateTaskForm from "./components/UpdateTaskForm/UpdateTaskForm"
 import { AuthProvider } from "./contexts/AuthContext"
 import { useAuth } from "./contexts/AuthContext"
 
-import "./App.css"
-
 function RequireAuth({ children, redirectTo }) {
   const { currentUser } = useAuth()
   return currentUser ? children : <Navigate to={redirectTo} replace />
@@ -37,6 +35,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/updatetask" element={<UpdateTaskForm />} />
+            <Route path="/completedtasks" element={<TaskManager />} />
           </Routes>
         </AuthProvider>
       </Router>

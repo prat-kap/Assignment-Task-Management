@@ -52,19 +52,20 @@ const UpdateTaskForm = props => {
             onSubmit={async values => {
               try {
                 if (!isEdit) {
-                  await tasksData.addTask(values)
                   setMessage({
                     error: false,
                     msg: NEW_TASK_ADDED
                   })
+                  setLoading(true)
+                  await tasksData.addTask(values)
                 } else {
-                  await tasksData.editTask(location.state?.id, values)
                   setMessage({
                     error: false,
                     msg: TASK_UPDATED
                   })
+                  setLoading(true)
+                  await tasksData.editTask(location.state?.id, values)
                 }
-                setLoading(true)
                 navigate("/")
               } catch (err) {
                 setMessage({ error: true, msg: err.message })
@@ -112,6 +113,7 @@ const UpdateTaskForm = props => {
                         <Form.Control
                           type="date"
                           name="dueDate"
+                          min={new Date().toISOString().split("T")[0]}
                           value={values.dueDate}
                           onChange={handleChange}
                           required
@@ -122,7 +124,7 @@ const UpdateTaskForm = props => {
                         <Form.Control
                           type="text"
                           name="status"
-                          value={values.status}
+                          value={values.status.toLowerCase()}
                           onChange={handleChange}
                           required
                         />
