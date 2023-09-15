@@ -28,8 +28,10 @@ const TaskHeader = props => {
   const handleDelete = async (e, id) => {
     e.preventDefault()
     e.stopPropagation()
+    setLoading(true)
     await tasksData.deleteTask(id)
     getTasks()
+    setLoading(false)
   }
 
   //Reset status checkbox
@@ -64,47 +66,49 @@ const TaskHeader = props => {
   }
 
   return (
-    <Row>
+    <>
       {loading && <Loading />}
       <Accordion.Header>
-        <Col xs={5}>
-          <Stack gap={1}>
-            <div className="title">{title}</div>
-            <div className="date">{`${DUE_DATE} ${dueDate}`}</div>
-          </Stack>
-        </Col>
-        <Col xs={4}>
-          <Stack gap={1}>
-            <div className="status">{`${STATUS} ${status}`}</div>
-            <Checkbox
-              label={`${MARK_STATUS} ${
-                status === PENDING ? COMPLETED : PENDING
-              }`}
-              id={`default-checkbox`}
-              onClick={e => handleEdit(e, item.id)}
-              checkboxRef={checkboxRef}
-              disabled={isDisabled}
-            />
-          </Stack>
-        </Col>
-        <Col xs={3}>
-          <Stack direction="horizontal" gap={2}>
-            <Card.Link
-              className={"custom-link edit p-2"}
-              onClick={e => handleEdit(e, item.id)}
-            >
-              {EDIT}
-            </Card.Link>
-            <Card.Link
-              className={"custom-link delete p-2"}
-              onClick={e => handleDelete(e, item.id)}
-            >
-              {DELETE}
-            </Card.Link>
-          </Stack>
-        </Col>
+        <Row xs={2} md={3} className="taskHeaderRow">
+          <Col md={5}>
+            <Stack gap={1}>
+              <div className="title">{title}</div>
+              <div className="date">{`${DUE_DATE} ${dueDate}`}</div>
+            </Stack>
+          </Col>
+          <Col md={4}>
+            <Stack gap={1}>
+              <div className="status">{`${STATUS} ${status}`}</div>
+              <Checkbox
+                label={`${MARK_STATUS} ${
+                  status === PENDING ? COMPLETED : PENDING
+                }`}
+                id={`default-checkbox`}
+                onClick={e => handleEdit(e, item.id)}
+                checkboxRef={checkboxRef}
+                disabled={isDisabled}
+              />
+            </Stack>
+          </Col>
+          <Col md={3}>
+            <Stack direction="horizontal" gap={2}>
+              <Card.Link
+                className={"custom-link edit p-2"}
+                onClick={e => handleEdit(e, item.id)}
+              >
+                {EDIT}
+              </Card.Link>
+              <Card.Link
+                className={"custom-link delete p-2"}
+                onClick={e => handleDelete(e, item.id)}
+              >
+                {DELETE}
+              </Card.Link>
+            </Stack>
+          </Col>
+        </Row>
       </Accordion.Header>
-    </Row>
+    </>
   )
 }
 

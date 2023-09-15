@@ -10,7 +10,7 @@ import { tasksData } from "../../services/tasks.services"
 import { Formik } from "formik"
 import { LABELS, MESSAGES } from "../../constants/CommonConsts"
 
-const UpdateTaskForm = props => {
+const UpdateTaskForm = () => {
   const [message, setMessage] = useState({ error: false, msg: "" })
   const [loading, setLoading] = useState(false)
 
@@ -101,7 +101,7 @@ const UpdateTaskForm = props => {
                       <Form.Group controlId="description">
                         <Form.Label>{DESCRIPTION}</Form.Label>
                         <Form.Control
-                          type="textarea"
+                          type="text"
                           name="description"
                           value={values.description}
                           onChange={handleChange}

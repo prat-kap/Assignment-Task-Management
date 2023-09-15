@@ -10,3 +10,9 @@
 .delete {
   background: indianred;
 }
+.taskHeaderRow {
+  width: 100%;
+}
+.taskItem {
+  border: 1px solid rgb(108 117 125 / 50%) !important;
+}

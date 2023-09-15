@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# About the Task management app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This app with basic design lets the user create, edit, delete and mark tasks as completed or pending.
+A task will have the following details
 
-## Available Scripts
+- Title
+- Description
+- Due Date
+- Status
+- Priority
+  The task details are in a Accordion component which is inside (TaskView). Title, Due Date, Status, Checkbox to mark the status as complete or pending, Edit and Delete buttons are in Accordion Header component (TaskHeader). Task description in in Accordion body (TaskDescription).
 
-In the project directory, you can run:
+## App flow
 
-### `npm start`
+Once the user hits the app url, he will be redirected to Login Page (Login component). If the user is new, he will have to Register before signing in. Register component is with the name (Register). Register component is a Formik form with following fields
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Full Name
+- Email
+- Password (min 6 characters)
+- Confirm Password
+  Once the user Registers or Sign In successfully, he will be redirected to Landing page of the app (TaskManager) which has the task details inside Accordion component and the option to Add New tasks.
+  On Add New and Edit tasks, user will be taken to a form page (Formik form) to add or edit the tasks (UpdateTaskForm). Once completed, he will redirect to landing page.
+  There is an option to view completed tasks as well on click of a link.
+  The tasks are set based on priority rankings.
+  User can search for tasks based on title, status and description.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Components
 
-### `npm test`
+- Auth - for Login and Register
+- Checkbox - to mark tasks as Complete/ Pending
+- ErrorBoundary - for error handling
+- Header- app Header with app name and Search option
+- Loader
+- TaskManager - to view the tasks, edit, add, delete, view completed tasks
+- TaskDescription
+- TaskHeader - title, due date, status, edit, delete
+- UpdateTaskForm - to add or edit the task details
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### Packages
 
-### `npm run build`
+- React Bootstrap
+- Firebase
+- Formil
+- i18next
+- React Router Dom
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+##### Additional features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- User Authentication
+  Implemented user authentication using a library Firebase Authentication.
+  User can register, log in, and log out.
+  Only authenticated users can access the task management features.
+- Task Priority
+  Introduced a priority level for tasks (Priority number).
+  User can set the priority of each task.
+- Data Persistence
+  Storing task data on cloud database Firebase Firestore.
+  Task data is synchronized across devices for the same user.
+- Search:
+  Search functionality to search for tasks by title, status, description.
+- Internationalization (i18n):
+  Support for couple of languages added by implementing internationalization.

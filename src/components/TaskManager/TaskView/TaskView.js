@@ -5,6 +5,8 @@ import PropTypes from "prop-types"
 import TaskHeader from "../TaskHeader/TaskHeader"
 import TaskDescription from "../TaskDescription/TaskDescription"
 
+import "../TaskManager.css"
+
 const TaskView = props => {
   const { tasksList, query, setTasksList, getTasks } = props
 
@@ -42,7 +44,7 @@ const TaskView = props => {
               onDragEnter={e => (dragOverItem.current = index)}
               onDragEnd={handleSort}
               onDragOver={e => e.preventDefault()}
-              className="mb-2"
+              className="mb-2 taskItem"
             >
               <TaskHeader item={item} getTasks={getTasks} />
               <TaskDescription item={item} />
