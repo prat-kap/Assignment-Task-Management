@@ -8,7 +8,6 @@ import Loading from "../Loader/Loading"
 
 import { useAuth } from "../../contexts/AuthContext"
 import { Formik } from "formik"
-import { MESSAGES } from "../../constants/CommonConsts"
 
 const Register = () => {
   const [message, setMessage] = useState({ error: false, msg: "" })
@@ -17,8 +16,6 @@ const Register = () => {
   const { signup } = useAuth()
   const navigate = useNavigate()
   const { t } = useTranslation("common")
-
-  const { MIN_CHARACTERS_REQUIRED } = MESSAGES
 
   return (
     <>
@@ -37,10 +34,14 @@ const Register = () => {
               confirmPassword: ""
             }}
             onSubmit={async values => {
-              if (values.password.length < 6) {
+              if (
+                !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}/i.test(
+                  values.password
+                )
+              ) {
                 return setMessage({
                   error: true,
-                  msg: MIN_CHARACTERS_REQUIRED
+                  msg: `${t("passwordError")}`
                 })
               }
               if (values.password !== values.confirmPassword) {
@@ -50,12 +51,12 @@ const Register = () => {
                 })
               }
               try {
+                setLoading(true)
+                await signup(values.email, values.password)
                 setMessage({
                   error: false,
                   msg: `${t("accountCreated")}`
                 })
-                setLoading(true)
-                await signup(values.email, values.password)
                 window.localStorage.setItem("isLoggedIn", true)
                 navigate("/")
               } catch {
@@ -104,7 +105,7 @@ const Register = () => {
                         <Form.Control
                           type="password"
                           name="password"
-                          placeholder="Minimum 6 characters length"
+                          placeholder="Min 6 with upper,lower,special chars"
                           value={values.password}
                           onChange={handleChange}
                           required
