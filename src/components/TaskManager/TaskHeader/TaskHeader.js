@@ -18,15 +18,22 @@ const TaskHeader = props => {
   const [isDisabled, setIsDisabled] = useState(false)
   const checkboxRef = useRef(null)
 
-  const { dueDate, status, title } = item
-  const { DUE_DATE, STATUS, MARK_STATUS, EDIT, DELETE, PENDING, COMPLETED } =
-    LABELS
+  const { dueDate, status, title, priority } = item
+  const {
+    DUE_DATE,
+    STATUS,
+    MARK_STATUS,
+    EDIT,
+    DELETE,
+    PENDING,
+    COMPLETED,
+    PRIORITY
+  } = LABELS
 
   const navigate = useNavigate()
 
   //Hnadle delete task
   const handleDelete = async (e, id) => {
-    e.preventDefault()
     e.stopPropagation()
     setLoading(true)
     await tasksData.deleteTask(id)
@@ -74,6 +81,7 @@ const TaskHeader = props => {
             <Stack gap={1}>
               <div className="title">{title}</div>
               <div className="date">{`${DUE_DATE} ${dueDate}`}</div>
+              <div className="priority">{`${PRIORITY}: ${priority}`}</div>
             </Stack>
           </Col>
           <Col md={4}>

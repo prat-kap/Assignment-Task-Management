@@ -16,8 +16,9 @@ export const LABELS = {
   WELCOME_ACCOUNT: "Welcome to your account",
   LIST_OF: "List of",
   VIEW_COMPLETED: "View completed tasks",
-  PENDING: "pending",
-  COMPLETED: "completed"
+  PRIORITY: "Priority",
+  PENDING: "Pending",
+  COMPLETED: "Completed"
 }
 export const FORM_LABELS = {
   CREATE_ACCOUNT: "Create account",
@@ -43,3 +44,20 @@ export const MESSAGES = {
   ACCOUNT_CREATED: "Account created successfully",
   ACCOUNT_CREATION_FAILED: "Failed to create an account"
 }
+
+export const statuses = [
+  { key: 0, value: "Pending" },
+  { key: 1, value: "Completed" }
+]
+export const priorities = [
+  { key: 1, value: 1 },
+  { key: 2, value: 2 },
+  { key: 3, value: 3 },
+  { key: 4, value: 4 },
+  { key: 5, value: 5 },
+  { key: 6, value: 6 },
+  { key: 7, value: 7 },
+  { key: 8, value: 8 },
+  { key: 9, value: 9 },
+  { key: 10, value: 10 }
+]

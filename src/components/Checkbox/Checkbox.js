@@ -11,6 +11,7 @@ const Checkbox = props => {
       onClick={onClick}
       ref={checkboxRef}
       disabled={disabled}
+      data-testid="default-checkbox"
     />
   )
 }
