@@ -1,0 +1,199 @@
+---
+parameters:
+  - name: environment
+    displayName: Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - dev1a
+      - presit3
+      - presit2
+      - syt1r1b
+      - syt2
+      - syt3
+      - oat
+      - uat
+      - training
+      - hotfix
+      - preprod
+      - prod
+trigger: none
+name: '1.0.$(Rev:r)'
+
+stages:
+  - stage: Build
+    displayName: Build - $(environment) 
+    variables:
+      - group: claims-adb2c-ui
+      - name: environment
+        value: ${{ parameters.environment }}
+    pool:
+      name: vmss-agent
+    jobs:
+      - job: Build
+        displayName: ${{ Parameters.environment }}
+        steps:
+          - bash: |
+              df -h
+              rm -rf /agent/_work/1/s/*
+              sudo rm -rf /agent/_work/1/a/*
+              sudo rm -rf /agent/_work/1/b/*
+              sudo rm -rf /agent/_work/1/TestResults/*
+              sudo docker system prune -a -f                    
+              service docker stop
+              rm -rf /var/lib/docker/*
+              service docker start
+              service docker status
+              df -h
+            displayName: Clearing space and removing existing Docker images in local
+
+          - checkout: self
+            submodules: true
+            persistCredentials: true
+          
+          - task: replacetokens@5
+            displayName: 'Replace Tokens'
+            inputs:
+              rootDirectory: '$(Agent.BuildDirectory)/s'
+              targetFiles: '*.env.example'
+              encoding: 'auto'
+              tokenPattern: 'doublebraces'
+              writeBOM: true
+              escapeType: 'xml'
+              actionOnMissing: 'warn'
+              keepToken: false
+              actionOnNoFiles: 'continue'
+              enableTransforms: false
+              enableRecursion: false
+              useLegacyPattern: false
+              enableTelemetry: true
+
+          - bash: |
+              cp $(Agent.BuildDirectory)/s/.env.example $(Build.SourcesDirectory)/.env
+            displayName: 'Copy .env.example to .env'
+
+          - task: SonarQubePrepare@6
+            inputs:
+              SonarQube: 'claims-sonarqube'
+              scannerMode: 'CLI'
+              configMode: 'manual'
+              cliProjectKey: 'Claims.ADB2C.UI'
+              cliProjectName: 'Claims.ADB2C.UI'
+              cliSources: '.'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+
+          - task: Npm@0
+            displayName: Install
+            inputs:
+              arguments: --legacy-peer-deps
+              
+          - task: Npm@0
+            displayName: Build
+            inputs:
+              command: run
+              arguments: build:${{ parameters.environment }}
+
+          - script: |
+              rm $(Build.SourcesDirectory)/.env
+              rm $(Build.SourcesDirectory)/.env.example
+              ls
+            displayName: 'remove .env'
+
+          - script: |
+              sudo apt install zip
+              zip --version
+            displayName: 'Install Zip'
+
+          - script: |
+              cp $(Build.SourcesDirectory)/package.json $(Agent.BuildDirectory)/s/out/
+              cp $(Build.SourcesDirectory)/package-lock.json $(Agent.BuildDirectory)/s/out/
+            displayName: 'Add package file for scan'
+          
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: '$(Agent.BuildDirectory)/s/out'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'     
+
+          - script: |
+              rm $(Agent.BuildDirectory)/s/out/package.json
+              rm $(Agent.BuildDirectory)/s/out/package-lock.json
+            displayName: 'remove .env'  
+
+          - script: |
+              sudo apt install openjdk-17-jdk openjdk-17-jre -y
+              export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+              java -version
+              echo $JAVA_HOME
+            displayName: 'install java'  
+
+          # - task: Veracode@3
+          #   inputs:
+          #     ConnectionDetailsSelection: 'Credentials'
+          #     apiId: '$(veracode_id)'
+          #     apiKey: '$(veracode_secret)'
+          #     veracodeAppProfile: 'Claims-adb2c-UI'
+          #     version: '$(build.buildNumber)'
+          #     filepath: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+          #     importResults: true
+          #     failBuildOnPolicyFail: true
+          #     maximumWaitTime: '360'
+          #     createProfile: true
+          #     failBuildIfUploadAndScanBuildStepFails: true
+          #     optargs: '-deleteincompletescan 2'
+
+          # - task: SonarQubeAnalyze@6
+          #   inputs:
+          #     jdkversion: 'JAVA_HOME_17_X64'
+          
+          # - task: SonarQubePublish@6
+          #   inputs:
+          #     pollingTimeoutSec: '300'
+
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(Agent.BuildDirectory)/s/deployScript/azcopy_linux_amd64_10.14.1.tar.gz'
+              destinationFolder: '$(Agent.BuildDirectory)/s/'
+              cleanDestinationFolder: false
+              overwriteExistingFiles: false
+          
+          - script: |
+              sudo cp -rf $(Agent.BuildDirectory)/s/azcopy_linux_amd64_10.14.1/azcopy /usr/bin/ 
+            displayName: 'Copy Azcopy'
+
+          - bash: bash $(Agent.BuildDirectory)/s/deployScript/deploy.sh
+            displayName: 'Copy to Storage'
+            env:
+              BuildDirectory: $(Agent.BuildDirectory)
+              environment: ${{ parameters.environment }}
+              stasat: $(sta${{ parameters.environment }}sat)     
+              
+          - task: UniversalPackages@0
+            displayName: 'Publish Package'
+            inputs:
+              command: publish
+              publishDirectory: '$(Agent.BuildDirectory)/s/out'        ## Location of the files you wish to publish
+              vstsFeedPublish: 'RSAClaimsAnalytics'                ## The project and feed name to publish to. If you're working with an organization-scoped feed, specify only the feed name
+              vstsFeedPackagePublish: 'adb2cui-package'                     ## The package name. Must be lower case. Use only letters, numbers, and dashes
+              packagePublishDescription: '$(Build.BuildNumber)' 
+
+              
+
+          # - script: |
+          #     export AZURE_DEVOPS_EXT_PAT=$(AZURE_DEVOPS_EXT_PAT)
+          #     az extension add --name azure-devops
+          #     echo $AZURE_DEVOPS_EXT_PAT | az devops login --organization https://dev.azure.com/RSAClaimsAnalytics/ --verbose
+          #     az artifacts universal publish --organization https://dev.azure.com/RSAClaimsAnalytics/ --feed RSAClaimsAnalytics --name adb2cui-package --version $(Build.BuildNumber) --path $(Agent.BuildDirectory)/s/out --debug
+          #   displayName: 'Publish Package'
