@@ -91,9 +91,6 @@ stages:
             displayName: Install
             inputs:
               arguments: --legacy-peer-deps
-
-          - bash: npm install -g cross-env
-            displayName: 'Install cross-env globally'
               
           - task: Npm@0
             displayName: Build
