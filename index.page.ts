@@ -1,29 +1,43 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { getConditionalSchemaValidate } from '@/pages/admin/brokers/validate/[action]/[reqCode]/index.data';
+import { brokerSchema } from '@/pages/brokers/signup/index.data';
 import type {
   IResponseData,
-  TBrokerValidate,
-  TBrokerValidateEmailPayload,
-  TFuncHandleBrokerValidate
-} from '@/types/gobal';
-import { createUserInAD } from '@/utils/graphApi/createUserInAD';
+  TBroker,
+  TBrokerEmailPayload,
+  TBrokerWithHoneypot,
+  TFuncHandleBrokerSignupRequest
+} from '@/types/declarations';
 import logger from '@/utils/logger';
 import type { IGenericObjectInterface } from '@/utils/types';
 import { getYupErrorsBySchema } from '@/utils/yup';
 import type { MailDataRequired } from '@sendgrid/helpers/classes/mail';
 import type { ResponseError } from '@sendgrid/mail';
 import sgMail from '@sendgrid/mail';
-import type * as yup from 'yup';
+import { compressToEncodedURIComponent } from 'lz-string';
 
-const handleBrokerValidate: TFuncHandleBrokerValidate = async (
-  brokerValidate: TBrokerValidate
+const handleBrokerSignupRequest: TFuncHandleBrokerSignupRequest = async (
+  req: NextApiRequest
 ): Promise<boolean> => {
-  const conditionalSchemaValidate: yup.ObjectSchema<yup.Maybe<yup.AnyObject>> =
-    getConditionalSchemaValidate(brokerValidate.action);
+  const brokerWithHoneypot: TBrokerWithHoneypot = req.body;
+  const { policyCountry, ...restBrokerWithHoneypot } = brokerWithHoneypot;
+  const broker: TBroker = restBrokerWithHoneypot;
+
+  // honeypot...
+  if (policyCountry !== '') {
+    const ip: string = (req.headers['x-forwarded-for'] ||
+      req.socket.remoteAddress ||
+      '') as string;
+    const userAgent: string = req.headers['user-agent'] || '';
+    // log details...
+    logger.trace({ ip: ip, userAgent: userAgent }, 'Honeypot Error Source');
+    logger.trace(brokerWithHoneypot, 'Honeypot Error Payload');
+    return true; // dubious success
+  }
+
   const errors: IGenericObjectInterface<string> = await getYupErrorsBySchema(
-    conditionalSchemaValidate,
-    brokerValidate
+    brokerSchema,
+    broker
   );
   const hasErrors: boolean = Object.keys(errors).length !== 0;
   if (hasErrors) {
@@ -32,88 +46,93 @@ const handleBrokerValidate: TFuncHandleBrokerValidate = async (
 
   sgMail.setApiKey(process.env.SENDGRIDAPIKEY ?? '');
 
-  const baseUrl: string = `${process.env.BRKBASEURL}`;
-  const brokerValidateEmailPayload: TBrokerValidateEmailPayload = {
-    ...brokerValidate,
+  // send email to business to notify...
+  const baseUrl: string = `${process.env.BASEBRKURL}`;
+  const baseAdminUrl: string = `${process.env.BASEBRKADMINURL}`;
+  const reqCode: string = compressToEncodedURIComponent(JSON.stringify(broker));
+  let brokerEmailPayload: TBrokerEmailPayload = {
+    ...broker,
+    baseUrl: baseAdminUrl,
+    reqCode: reqCode
+  };
+  const sendEmailToBusinessPayloadConfig: MailDataRequired = JSON.parse(
+    process.env.SENDGRIDTPLBUSINESSNOTIFY ?? ''
+  );
+  const {
+    subject: subjectEmailToBusiness,
+    ...restSendEmailToBusinessPayloadConfig
+  } = sendEmailToBusinessPayloadConfig;
+  const sendEmailToBusinessPayload: MailDataRequired = {
+    ...restSendEmailToBusinessPayloadConfig,
+    dynamicTemplateData: {
+      ...brokerEmailPayload,
+      subject: subjectEmailToBusiness // Note: subject is template in the setting
+    }
+  };
+  try {
+    const sgMailRet: [sgMail.ClientResponse, NonNullable<unknown>] =
+      await sgMail.send(sendEmailToBusinessPayload);
+    logger.info(
+      {
+        messageType: 'business-notify',
+        statusCode: sgMailRet?.[0]?.statusCode
+      },
+      'Email sent'
+    );
+  } catch (error) {
+    const err: ResponseError = error as ResponseError;
+    if (err?.response) {
+      logger.error(
+        {
+          messageType: 'business-notify',
+          statusCode: err?.response?.body
+        },
+        'Error in sending email'
+      );
+    }
+  }
+
+  // send thank/submitted message to the broker...
+  brokerEmailPayload = {
+    ...broker,
     baseUrl: baseUrl
   };
-
-  switch (brokerValidate.action) {
-    case 'approve':
+  const sendEmailToBrokerSubmittedPayloadConfig: MailDataRequired = JSON.parse(
+    process.env.SENDGRIDTPLBRKSUBMITTED ?? ''
+  );
+  const {
+    subject: subjectEmailToBrokerSubmitted,
+    ...restSendEmailToBrokerSubmittedPayloadConfig
+  } = sendEmailToBrokerSubmittedPayloadConfig;
+  const sendEmailToBrokerSubmittedPayload: MailDataRequired = {
+    to: broker.email,
+    ...restSendEmailToBrokerSubmittedPayloadConfig,
+    dynamicTemplateData: {
+      ...brokerEmailPayload,
+      subject: subjectEmailToBrokerSubmitted
+    }
+  };
+  try {
+    const sgMailRet: [sgMail.ClientResponse, NonNullable<unknown>] =
+      await sgMail.send(sendEmailToBrokerSubmittedPayload);
+    logger.info(
       {
-        const isCreatedUser: boolean = await createUserInAD(brokerValidate);
-
-        if (isCreatedUser === false) {
-          return false;
-        }
-
-        // send email to broker with invite/login link
-        const sendEmailToBrokerApprovedPayloadConfig: MailDataRequired =
-          JSON.parse(process.env.SENDGRIDTPLBRKAPPROVED ?? '');
-        const {
-          subject: subjectEmailToBrokerApproved,
-          ...restSendEmailToBrokerApprovedPayloadConfig
-        } = sendEmailToBrokerApprovedPayloadConfig;
-        const sendEmailToBrokerApprovedPayload: MailDataRequired = {
-          to: brokerValidate.email,
-          ...restSendEmailToBrokerApprovedPayloadConfig,
-          dynamicTemplateData: {
-            ...brokerValidateEmailPayload,
-            subject: subjectEmailToBrokerApproved
-          }
-        };
-        try {
-          logger.trace(
-            sendEmailToBrokerApprovedPayload,
-            'sendEmailToBrokerApprovedPayload'
-          );
-          const sgMailRet: [sgMail.ClientResponse, NonNullable<unknown>] =
-            await sgMail.send(sendEmailToBrokerApprovedPayload);
-          logger.trace(sgMailRet, 'sgMailRet');
-          logger.info('Email sent');
-        } catch (error) {
-          const err: ResponseError = error as ResponseError;
-          if (err?.response) {
-            logger.error(err?.response?.body, 'Error in sending email');
-          }
-        }
-      }
-      break;
-
-    case 'reject':
-      {
-        // send email to broker with rejection reason
-        const sendEmailToBrokerRejectedPayloadConfig: MailDataRequired =
-          JSON.parse(process.env.SENDGRIDTPLBRKREJECTED ?? '');
-        const {
-          subject: subjectEmailToBrokerRejected,
-          ...restSendEmailToBrokerRejectedPayloadConfig
-        } = sendEmailToBrokerRejectedPayloadConfig;
-        const sendEmailToBrokerRejectedPayload: MailDataRequired = {
-          to: brokerValidate.email,
-          ...restSendEmailToBrokerRejectedPayloadConfig,
-          dynamicTemplateData: {
-            ...brokerValidateEmailPayload,
-            subject: subjectEmailToBrokerRejected
-          }
-        };
-        try {
-          logger.trace(
-            sendEmailToBrokerRejectedPayload,
-            'sendEmailToBrokerRejectedPayload'
-          );
-          const sgMailRet: [sgMail.ClientResponse, NonNullable<unknown>] =
-            await sgMail.send(sendEmailToBrokerRejectedPayload);
-          logger.trace(sgMailRet, 'sgMailRet');
-          logger.info('Email sent');
-        } catch (error) {
-          const err: ResponseError = error as ResponseError;
-          if (err?.response) {
-            logger.error(err?.response?.body, 'Error in sending email');
-          }
-        }
-      }
-      break;
+        messageType: 'broker-submitted',
+        statusCode: sgMailRet?.[0]?.statusCode
+      },
+      'Email sent'
+    );
+  } catch (error) {
+    const err: ResponseError = error as ResponseError;
+    if (err?.response) {
+      logger.error(
+        {
+          messageType: 'broker-submitted',
+          statusCode: err?.response?.body
+        },
+        'Error in sending email'
+      );
+    }
   }
 
   return true;
@@ -126,14 +145,16 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
-        if (await handleBrokerValidate(req.body)) {
+        if (await handleBrokerSignupRequest(req)) {
           res.status(200).end();
         } else {
           res.status(403).end();
         }
       } catch (error) {
         logger.error(error, 'Error');
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({
+          error: 'Internal Server Error: ' + (error as Error)?.message
+        });
       }
 
       break;
